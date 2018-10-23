@@ -27,14 +27,26 @@ app.get('/todos', (req, res) => {
 
 app.get('/todos/:id', (req, res) => {
     const id = req.params.id;
+
     if (!ObjectID.isValid(id)) {
         return res.status(404).send('ID is not valid');
     }
-    Todo
-        .findById(id)
-        .then(todo => todo ? res.send({ todo }) : res.status(404).send('Unable to find todo'))
-        .catch(e => res.status(400).send());
 
+    Todo.findById(id)
+        .then(todo => todo ? res.status(200).send({ todo }) : res.status(404).send('Unable to find todo'))
+        .catch(e => res.status(400).send());
+});
+
+app.delete('/todos/:id', (req, res) => {
+    const id = req.params.id;
+
+    if (!ObjectID.isValid(id)) {
+        return res.status(404).send('ID is not valid');
+    }
+
+    Todo.findByIdAndDelete(id)
+        .then(todo => todo ? res.status(200).send({ todo }) : res.status(404).send('Unable to find todo'))
+        .catch(e => res.status(400).send());
 });
 
 app.listen(port, () => console.log(`Started up at port ${port}`));
