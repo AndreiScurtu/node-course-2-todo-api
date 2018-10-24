@@ -1,19 +1,20 @@
 require('./config/config');
 
-const _ = require('lodash');
-const express = require('express');
-const bodyParser = require('body-parser');
-const { ObjectID } = require('mongodb');
+const _ = require('lodash'),
+      express = require('express'),
+      bodyParser = require('body-parser'),
+      { ObjectID } = require('mongodb'),
+      { mongoose } = require('./db/mongoose'),
+      { Todo } = require('./models/todo'),
+      { User } = require('./models/user');
 
-const { mongoose } = require('./db/mongoose');
-const { Todo } = require('./models/todo');
-const { User } = require('./models/user');
-
-const app = express();
-const port = process.env.PORT;
+const app = express(),
+      port = process.env.PORT;
 
 app.use(bodyParser.json());
 
+
+// Create new 'todo'
 app.post('/todos', (req, res) => {
     const todo = new Todo({
         text: req.body.text
@@ -22,12 +23,16 @@ app.post('/todos', (req, res) => {
     todo.save().then(doc => res.send(doc), e => res.status(400).send(e));
 });
 
+
+// Get all 'todos'
 app.get('/todos', (req, res) => {
     Todo.find().then(todos => {
         res.send({ todos });
     }, e => res.status(400).send(e));
 });
 
+
+// Get a todo by its id
 app.get('/todos/:id', (req, res) => {
     const id = req.params.id;
 
@@ -40,6 +45,8 @@ app.get('/todos/:id', (req, res) => {
         .catch(e => res.status(400).send());
 });
 
+
+// Delete a 'todo' by its id
 app.delete('/todos/:id', (req, res) => {
     const id = req.params.id;
 
@@ -52,6 +59,8 @@ app.delete('/todos/:id', (req, res) => {
         .catch(e => res.status(400).send());
 });
 
+
+// Update a 'todo' by its id
 app.patch('/todos/:id', (req, res) => {
     const id = req.params.id,
         body = _.pick(req.body, ['text', 'completed']);
@@ -67,7 +76,7 @@ app.patch('/todos/:id', (req, res) => {
         body.completedAt = null;
     }
 
-    Todo.findByIdAndUpdate(id, { $set: body}, {new: true})
+    Todo.findByIdAndUpdate(id, { $set: body }, { new: true })
         .then(todo => {
             if (!todo) {
                 return res.status(404).send();
@@ -79,6 +88,20 @@ app.patch('/todos/:id', (req, res) => {
 
 });
 
+
+// Create new user
+app.post('/users', (req, res) => {
+    const user = new User(_.pick(req.body, ['email', 'password']));
+
+    user.save()
+        .then(() => user.generateAuthToken())
+        .then(token => res.header('x-auth', token).send(user))
+        .catch(err => res.status(400).send(err));
+});
+
+
+// Start listening on an environment defined port
+// - the port is defined in 'config/config.js'
 app.listen(port, () => console.log(`Started up at port ${port}`));
 
 module.exports = { app };
