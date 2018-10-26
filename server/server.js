@@ -107,6 +107,21 @@ app.get('/users/me', authenticate, (req, res) => {
 });
 
 
+// Login a user
+app.post('/users/login', (req, res) => {
+    const body = _.pick(req.body, ['email', 'password']);
+
+    User.findByCredentials(body.email, body.password)
+        .then(user => {
+            user.generateAuthToken()
+                .then(token => res.header('x-auth', token).send(user));
+        })
+        .catch(e => {
+            res.status(400).send();
+        });
+});
+
+
 // Start listening on an environment defined port
 // - the port is defined in 'config/config.js'
 app.listen(port, () => console.log(`Started up at port ${port}`));
