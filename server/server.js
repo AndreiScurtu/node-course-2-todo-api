@@ -122,6 +122,14 @@ app.post('/users/login', (req, res) => {
 });
 
 
+// Log out a user
+app.delete('/users/me/token', authenticate, (req, res) => {
+    req.user.removeToken(req.token)
+        .then(() => res.status(200).send())
+        .catch(e => res.status(400).send(e));
+});
+
+
 // Start listening on an environment defined port
 // - the port is defined in 'config/config.js'
 app.listen(port, () => console.log(`Started up at port ${port}`));
