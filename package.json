@@ -33,7 +33,7 @@
   "homepage": "https://github.com/AndreiScurtu/node-course-2-todo-api#readme",
   "description": "",
   "devDependencies": {
-    "expect": "^23.5.0",
+    "expect": "^23.6.0",
     "mocha": "^5.2.0",
     "nodemon": "^1.18.3",
     "supertest": "^3.1.0"
